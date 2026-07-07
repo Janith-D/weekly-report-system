@@ -16,7 +16,7 @@ export function Navbar() {
   const navLinks: { label: string; href: string; roles: string[] }[] = [
     {
       label: "Dashboard",
-      href: role === "ADMIN" ? "/admin/users" : role === "MANAGER" ? "/manager/dashboard" : "/member/dashboard",
+      href: role === "ADMIN" ? "/admin/dashboard" : role === "MANAGER" ? "/manager/dashboard" : "/member/dashboard",
       roles: ["TEAM_MEMBER", "MANAGER", "ADMIN"],
     },
     {
