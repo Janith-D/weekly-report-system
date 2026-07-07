@@ -1,36 +1,110 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Team Weekly Report System
+
+A role-based weekly report management system built with Next.js 16. Team members submit structured weekly reports, managers review and comment, and admins manage the workspace.
+
+## Tech Stack
+
+- **Framework:** Next.js 16.2.10 (Turbopack)
+- **Auth:** NextAuth v4 with credentials (JWT)
+- **Database:** PostgreSQL with Prisma ORM
+- **UI:** Tailwind CSS v4, Lucide icons, Recharts
+- **AI:** NVIDIA Llama 3.1 70B via OpenAI SDK
+- **Forms:** react-hook-form + Zod validation
+
+## Roles
+
+| Role | Permissions |
+|------|------------|
+| **ADMIN** | Full access — users, projects, all reports, analytics |
+| **MANAGER** | View dashboards, review/submit reports, manage projects |
+| **TEAM_MEMBER** | Submit weekly reports, view own dashboard |
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 20+
+- PostgreSQL running on `localhost:5432`
+
+### Setup
 
 ```bash
+# Install dependencies
+npm install
+
+# Set up environment
+# Edit .env if needed (defaults work for local dev)
+
+# Create database
+npx prisma db push
+
+# Seed with sample data
+npm run seed
+
+# Start dev server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Test Accounts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Role | Email | Password |
+|------|-------|----------|
+| Admin | admin@company.com | password123 |
+| Manager | manager@company.com | password123 |
+| Member | alice@company.com | password123 |
 
-## Learn More
+## Project Structure
 
-To learn more about Next.js, take a look at the following resources:
+```
+app/
+├── admin/dashboard/      # Admin overview with charts & user management
+├── admin/users/          # User management (CRUD)
+├── manager/dashboard/    # Manager summary with activity feed
+├── manager/projects/     # Project CRUD
+├── manager/reports/      # Review team reports
+├── manager/analytics/    # Charts & team metrics
+├── member/dashboard/     # Personal report summary
+├── member/reports/       # Submit & view own reports
+├── api/auth/             # NextAuth + registration
+├── api/projects/         # Project CRUD API
+├── api/reports/          # Report CRUD API
+├── api/ai/chat/          # AI assistant chat
+├── api/users/            # User management API
+├── api/manager/          # Manager dashboard/reports API
+├── api/admin/            # Admin dashboard API
+├── login/                # Login page
+└── register/             # Registration page
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Scripts
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+npm run dev          # Start dev with Turbopack
+npm run build        # Production build
+npm start            # Start production server
+npm run lint         # Run ESLint
+npm run seed         # Seed database with sample data
+npm run prisma:generate  # Regenerate Prisma client
+npm run prisma:migrate   # Run Prisma migrations
+```
 
-## Deploy on Vercel
+## AI Assistant
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Managers can ask natural-language questions about team reports via the AI chat widget. Powered by NVIDIA's Llama 3.1 70B model. Configured via `.env`:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `AI_PROVIDER=nvidia`
+- `NVIDIA_API_KEY=...`
+- `NVIDIA_MODEL=meta/llama-3.1-70b-instruct`
+
+## Database
+
+The schema includes 5 models:
+
+- **User** — accounts with role-based access
+- **Project** — work categories with active/inactive status
+- **ProjectMember** — user-project assignments
+- **WeeklyReport** — weekly submissions with tasks, blockers, hours, status
+- **ManagerComment** — comments on reports
+- **ActivityLog** — audit trail of key actions
