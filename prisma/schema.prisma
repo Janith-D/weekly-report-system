@@ -1,0 +1,117 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  TEAM_MEMBER
+  MANAGER
+  ADMIN
+}
+
+enum ReportStatus {
+  DRAFT
+  SUBMITTED
+  LATE
+}
+
+enum WorkStatus {
+  ON_TRACK
+  AT_RISK
+  BLOCKED
+}
+
+model User {
+  id              String         @id @default(cuid())
+  name            String
+  email           String         @unique
+  password        String
+  role            Role           @default(TEAM_MEMBER)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  reports         WeeklyReport[]
+  projectMembers  ProjectMember[]
+  activities      ActivityLog[]
+  comments        ManagerComment[]
+}
+
+model Project {
+  id              String          @id @default(cuid())
+  name            String
+  description     String?
+  isActive        Boolean         @default(true)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  reports         WeeklyReport[]
+  members         ProjectMember[]
+}
+
+model ProjectMember {
+  id          String   @id @default(cuid())
+
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  assignedAt  DateTime @default(now())
+
+  @@unique([userId, projectId])
+}
+
+model WeeklyReport {
+  id                    String           @id @default(cuid())
+
+  userId                String
+  user                  User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  projectId             String
+  project               Project          @relation(fields: [projectId], references: [id])
+
+  weekStartDate         DateTime
+  weekEndDate           DateTime
+
+  tasksCompleted        String
+  tasksPlannedNextWeek  String
+  blockersChallenges    String?
+  hoursWorked           Float?
+  notesLinks            String?
+
+  workStatus            WorkStatus       @default(ON_TRACK)
+  reportStatus          ReportStatus     @default(DRAFT)
+
+  submittedAt           DateTime?
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+
+  comments              ManagerComment[]
+
+  @@unique([userId, weekStartDate, weekEndDate])
+}
+
+model ManagerComment {
+  id          String       @id @default(cuid())
+  content     String
+  reportId    String
+  report      WeeklyReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  authorId    String
+  author      User         @relation(fields: [authorId], references: [id])
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model ActivityLog {
+  id          String   @id @default(cuid())
+  action      String
+  description String
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reportId    String?
+  createdAt   DateTime @default(now())
+}
