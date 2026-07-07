@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { getAIReportContext, generateMockResponse } from "@/lib/ai";
+import { getAIReportContext, generateSystemPrompt } from "@/lib/ai";
+import { askAI } from "@/lib/ai/ai-provider";
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
@@ -33,11 +34,14 @@ export async function POST(req: Request) {
     weekEnd.setHours(23, 59, 59, 999);
 
     const context = await getAIReportContext(weekStart, weekEnd);
+    const systemPrompt = generateSystemPrompt(context);
+    const fullPrompt = `${systemPrompt}\n\nManager question: "${message}"`;
 
-    const response = generateMockResponse(message, context);
+    const response = await askAI(fullPrompt);
 
     return NextResponse.json({ response });
   } catch (error) {
+    console.error("AI chat error:", error);
     return NextResponse.json(
       { error: "Failed to process message" },
       { status: 500 }
