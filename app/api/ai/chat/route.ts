@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { getAIReportContext, generateSystemPrompt } from "@/lib/ai";
+import { getAIReportContext } from "@/lib/ai";
 import { askAI } from "@/lib/ai/ai-provider";
 
 export async function POST(req: Request) {
@@ -34,10 +34,7 @@ export async function POST(req: Request) {
     weekEnd.setHours(23, 59, 59, 999);
 
     const context = await getAIReportContext(weekStart, weekEnd);
-    const systemPrompt = generateSystemPrompt(context);
-    const fullPrompt = `${systemPrompt}\n\nManager question: "${message}"`;
-
-    const response = await askAI(fullPrompt);
+    const response = await askAI(message, context);
 
     return NextResponse.json({ response });
   } catch (error) {
